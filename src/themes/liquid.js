@@ -1,5 +1,5 @@
 export default {
- id:'liquid',name:'LIQUID ORBIT',subtitle:'Electric aqua. Liquid chrome. A small spacecraft for your next escape.',filename:'cosmic_drift.avi',width:1086,height:1448,
+ id:'liquid',name:'LIQUID ORBIT',subtitle:'Electric aqua. Liquid chrome. A small spacecraft for your next escape.',width:1086,height:1448,
  frame:'themes/liquid/frame.png',assetRoot:'themes/liquid/',
  aperture:{box:[258,366,665,444],polygon:'inset(0 round 17px)'},
  title:[281,314,550,35],time:[281,824,610,34],

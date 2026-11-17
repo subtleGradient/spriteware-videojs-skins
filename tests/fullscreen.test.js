@@ -17,3 +17,5 @@ test('native exit uses only video/document API and waits for confirmation',()=>{
 
 test('iPad prefers native video presenter when both fullscreen APIs exist',()=>{const x=setup();let nativeCalls=0;x.video.webkitSupportsFullscreen=true;x.video.webkitEnterFullscreen=()=>{nativeCalls++;x.video.webkitDisplayingFullscreen=true;x.video.dispatchEvent(new Event('webkitbeginfullscreen'))};x.video.requestFullscreen=()=>assert.fail('generic API must not replace the native video presenter');x.c.toggle();assert.equal(nativeCalls,1);assert.equal(x.c.mode,'native')});
 test('unsupported native video presenter still allows standard video fullscreen',()=>{const x=setup();x.video.webkitSupportsFullscreen=false;x.video.webkitEnterFullscreen=()=>assert.fail('unsupported native API');x.video.requestFullscreen=()=>{x.doc.fullscreenElement=x.video;x.doc.dispatchEvent(new Event('fullscreenchange'));return Promise.resolve()};x.c.toggle();assert.equal(x.c.mode,'native')});
+
+test('closing expanded fallback clears its stale status message',()=>{const x=setup();x.c.toggle();assert.ok(x.messages.at(-1));x.c.exit();assert.equal(x.messages.at(-1),'');assert.equal(x.c.mode,'inline')});

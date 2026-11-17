@@ -1,6 +1,6 @@
 // Artwork-only theme for the shared Spriteware Video.js engine.
 export default {
- id:'biopod',name:'BIOPOD',subtitle:'Ultraviolet glass. Silver ribs. Alien hardware.',filename:'bio_rhythm.mov',width:1086,height:1448,
+ id:'biopod',name:'BIOPOD',subtitle:'Ultraviolet glass. Silver ribs. Alien hardware.',width:1086,height:1448,
  frame:'themes/biopod/frame.png',assetRoot:'themes/biopod/',
  aperture:{box:[209,345,755,465],polygon:'polygon(9% 0,100% 0,90% 100%,0 100%)'},
  title:[287,291,650,46],time:[240,820,610,42],

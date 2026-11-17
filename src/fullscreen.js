@@ -4,7 +4,7 @@ export function createVideoFullscreen({video,button,doc=document,win=window,onEx
  const nativeActive=()=>doc.fullscreenElement===video||video.webkitDisplayingFullscreen===true||video.webkitPresentationMode==='fullscreen';
  const clear=()=>{if(timer!==null)cancel(timer);timer=null};
  function prepare(){if(previous)return;previous={controls:video.controls,tabindex:video.getAttribute('tabindex'),scroll:[win.scrollX,win.scrollY]};video.controls=true;video.tabIndex=0;}
- function restore(){clear();mode='inline';onExpanded(false);if(previous){video.controls=previous.controls;if(previous.tabindex===null)video.removeAttribute('tabindex');else video.setAttribute('tabindex',previous.tabindex);const scroll=previous.scroll;previous=null;button.setAttribute('aria-label','Enter fullscreen');button.focus({preventScroll:true});win.scrollTo(...scroll);}}
+ function restore(){clear();mode='inline';onExpanded(false);onMessage('');if(previous){video.controls=previous.controls;if(previous.tabindex===null)video.removeAttribute('tabindex');else video.setAttribute('tabindex',previous.tabindex);const scroll=previous.scroll;previous=null;button.setAttribute('aria-label','Enter fullscreen');button.focus({preventScroll:true});win.scrollTo(...scroll);}}
  function confirm(){if(!nativeActive())return;clear();mode='native';onExpanded(false);button.setAttribute('aria-label','Exit fullscreen');onMessage('');}
  function expand(message='Browser fullscreen is unavailable here. Video is expanded; use Close or Escape to return.'){if(nativeActive()){confirm();return}clear();prepare();mode='expanded';onExpanded(true);button.setAttribute('aria-label','Exit expanded video');onMessage(message);}
  function failure(){if(mode==='pending')expand();}

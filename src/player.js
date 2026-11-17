@@ -1,3 +1,4 @@
+import {mediaTitle} from './media-title.js';
 import {bindSeekPointer} from './seek.js';
 import {supportsMediaVolume,applyMediaVolume,bindVolumePointer} from './volume.js';
 import {createVideoFullscreen} from './fullscreen.js';
@@ -13,13 +14,14 @@ const base=import.meta.env.BASE_URL,asset=p=>base+p;
 document.title=theme.name+' · Spriteware';
 document.querySelector('h1').textContent=theme.name;
 document.querySelector('header p:last-child').textContent=theme.subtitle;
-const filename=theme.filename||'nebula_pop.mpg';
 const themeNav=document.createElement('nav');themeNav.setAttribute('aria-label','Player skins');
 for(const entry of Object.values(themes)){const link=document.createElement('a');link.href='?skin='+entry.id;link.textContent=entry.name;if(entry.id===theme.id)link.setAttribute('aria-current','page');themeNav.append(link,document.createTextNode(' · '))}
 document.querySelector('.notes').append(themeNav);
 const mount=document.querySelector('#mount');
-mount.innerHTML=`<video-player id="player"><section class="scene" aria-label="${theme.name} video player"><div class="aperture"><media-container><video id="video" playsinline preload="metadata" tabindex="-1" src="${asset('media/aqua-motion.mp4')}" poster="${asset('media/poster.jpg')}"><track kind="captions" srclang="en" label="Visual descriptions" src="${asset('media/captions.vtt')}"></video></media-container><p id="screen-error" role="status"></p></div><img class="frame" width="${theme.width}" height="${theme.height}" alt="" fetchpriority="high" src="${asset(theme.frame)}"><span class="title-readout">${filename}</span><span class="time-readout" aria-live="off">00:00 / 00:24</span><div class="chapter-menu" hidden><strong>CHAPTERS</strong><button data-time="0">01 · Chromatic drift</button><button data-time="8">02 · Pearl current</button><button data-time="16">03 · Prismatic tide</button><button id="close-chapters">Close</button></div></section></video-player>`;
+mount.innerHTML=`<video-player id="player"><section class="scene" aria-label="${theme.name} video player"><div class="aperture"><media-container><video id="video" playsinline preload="metadata" tabindex="-1" src="${asset('media/aqua-motion.mp4')}" poster="${asset('media/poster.jpg')}"><track kind="captions" srclang="en" label="Visual descriptions" src="${asset('media/captions.vtt')}"></video></media-container><p id="screen-error" role="status"></p></div><img class="frame" width="${theme.width}" height="${theme.height}" alt="" fetchpriority="high" src="${asset(theme.frame)}"><span class="title-readout"></span><span class="time-readout" aria-live="off">00:00 / 00:24</span><div class="chapter-menu" hidden><strong>CHAPTERS</strong><button data-time="0">01 · Chromatic drift</button><button data-time="8">02 · Pearl current</button><button data-time="16">03 · Prismatic tide</button><button id="close-chapters">Close</button></div></section></video-player>`;
 const $=s=>document.querySelector(s),scene=$('.scene'),video=$('#video'),player=$('#player');
+const currentMediaTitle=()=>mediaTitle({title:video.getAttribute('data-title')||video.getAttribute('title'),currentSrc:video.currentSrc,src:video.getAttribute('src')||video.querySelector('source')?.getAttribute('src'),baseURI:document.baseURI});
+$('.title-readout').textContent=currentMediaTitle();
 scene.style.aspectRatio=`${theme.width}/${theme.height}`;
 function place(el,[x,y,w,h]){Object.assign(el.style,{left:`${x/theme.width*100}%`,top:`${y/theme.height*100}%`,width:`${w/theme.width*100}%`,height:`${h/theme.height*100}%`})}
 place($('.aperture'),theme.aperture.box);$('.aperture').style.clipPath=theme.aperture.polygon;
@@ -55,7 +57,7 @@ function sync(){
  const cc=[...video.textTracks].some(t=>t.kind==='captions'&&t.mode==='showing');$('#captions').setAttribute('aria-pressed',String(cc));
  $('.chapter-menu').querySelectorAll('[data-time]').forEach(b=>b.setAttribute('aria-current',String(Math.floor(video.currentTime/8)*8===+b.dataset.time)));
  $('#previous').disabled=video.currentTime<.2;$('#next').disabled=video.currentTime>=16;
- $('.title-readout').textContent=video.error?'TRANSMISSION ERROR':buffering&&!video.paused?'BUFFERING…':filename;
+ $('.title-readout').textContent=video.error?'TRANSMISSION ERROR':buffering&&!video.paused?'BUFFERING…':currentMediaTitle();
 }
 $('#play').onclick=()=>{const attempt=video.play();attempt?.catch(()=>{$('#screen-error').textContent='Playback was blocked. Tap Play to try again.'});sync()};
 $('#pause').onclick=()=>{video.pause();sync()};
@@ -95,6 +97,6 @@ document.addEventListener('keydown',e=>{
  if(e.key.toLowerCase()==='f'){e.preventDefault();$('#fullscreen').click()}
 });
 const release=()=>document.querySelectorAll('[data-held]').forEach(b=>delete b.dataset.held);document.addEventListener('keyup',release);window.addEventListener('blur',release);document.addEventListener('focusout',release);
-for(const event of ['play','pause','timeupdate','loadedmetadata','durationchange','volumechange','ended','seeked'])video.addEventListener(event,sync);
+for(const event of ['loadstart','emptied','play','pause','timeupdate','loadedmetadata','durationchange','volumechange','ended','seeked'])video.addEventListener(event,sync);
 video.addEventListener('waiting',()=>{buffering=true;sync()});for(const event of ['playing','canplay'])video.addEventListener(event,()=>{buffering=false;$('#screen-error').textContent='';sync()});video.addEventListener('error',()=>{$('#screen-error').textContent='Transmission interrupted. Reload to reconnect.';sync()});
 sync();window.spriteware={theme,video,player,sync,seek};
