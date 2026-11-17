@@ -36,3 +36,8 @@ html{background:#23411e url('../public/meadow-wallpaper.webp') center/cover no-r
 .range.volume::-webkit-slider-runnable-track{width:100%;height:100%}
 .range.volume::-webkit-slider-thumb{width:100%;height:1px}
 .range.volume::-moz-range-thumb{width:100%;height:1px}
+
+/* Own only gestures starting on the seek rail; page scrolling elsewhere stays native. */
+.range.seek{touch-action:none}
+/* Hardware UI is operated, not selected. Page copy and browser video controls stay native. */
+.scene :is(.control,.mute,.range,.title-readout,.time-readout,.chapter-menu,.frame,.jewel){-webkit-user-select:none;user-select:none}

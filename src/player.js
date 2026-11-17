@@ -1,3 +1,4 @@
+import {bindSeekPointer} from './seek.js';
 import {supportsMediaVolume,applyMediaVolume,bindVolumePointer} from './volume.js';
 import {createVideoFullscreen} from './fullscreen.js';
 import {chapterTabExit,chapterArrowIndex} from './keyboard.js';
@@ -70,7 +71,8 @@ function changeVolume(value){
 $('#volume').oninput=e=>changeVolume(+e.target.value);
 bindVolumePointer($('#volume'),scene,theme,changeVolume);
 $('#volume').onkeydown=e=>{let value;const current=video.muted?0:video.volume;if(['ArrowUp','ArrowRight'].includes(e.key))value=current+.05;else if(['ArrowDown','ArrowLeft'].includes(e.key))value=current-.05;else if(e.key==='Home')value=0;else if(e.key==='End')value=1;else return;e.preventDefault();changeVolume(value)};
-$('#seek').addEventListener('pointerdown',()=>seeking=true);for(const e of ['pointerup','pointercancel','blur'])window.addEventListener(e,()=>{seeking=false;sync()});
+const endScrub=bindSeekPointer($('#seek'),scene,theme,{duration:()=>video.duration,seek,dragging:active=>{seeking=active;sync()}});
+window.addEventListener('blur',endScrub);
 $('#seek').oninput=e=>seek(+e.target.value);
 $('#seek').onkeydown=e=>{let t;const delta={ArrowRight:5,ArrowUp:5,ArrowLeft:-5,ArrowDown:-5,PageUp:10,PageDown:-10};if(e.key in delta)t=video.currentTime+delta[e.key];else if(e.key==='Home')t=0;else if(e.key==='End')t=video.duration;else return;e.preventDefault();seek(t)};
 $('#captions').onclick=()=>{const track=[...video.textTracks].find(t=>t.kind==='captions');if(track)track.mode=track.mode==='showing'?'hidden':'showing';sync()};video.textTracks.addEventListener('change',sync);

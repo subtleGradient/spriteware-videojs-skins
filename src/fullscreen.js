@@ -14,10 +14,12 @@ export function createVideoFullscreen({video,button,doc=document,win=window,onEx
   // A returned void is not proof that native fullscreen actually opened.
   timer=schedule(()=>{if(mode==='pending')expand();},1000);
   try{
-   if(doc.fullscreenEnabled!==false&&typeof video.requestFullscreen==='function'){
-    const attempt=video.requestFullscreen();attempt?.then(confirm,failure);
-   }else if(typeof video.webkitEnterFullscreen==='function'&&video.webkitSupportsFullscreen!==false){
+   // Safari's dedicated media presenter preserves video-only system controls.
+   // Prefer it when advertised, including iPad where both APIs can exist.
+   if(typeof video.webkitEnterFullscreen==='function'&&video.webkitSupportsFullscreen!==false){
     video.webkitEnterFullscreen();confirm();
+   }else if(doc.fullscreenEnabled!==false&&typeof video.requestFullscreen==='function'){
+    const attempt=video.requestFullscreen();attempt?.then(confirm,failure);
    }else if(typeof video.webkitSetPresentationMode==='function'&&video.webkitSupportsPresentationMode?.('fullscreen')){
     video.webkitSetPresentationMode('fullscreen');confirm();
    }else expand();
