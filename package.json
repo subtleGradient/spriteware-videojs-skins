@@ -1,1 +1,37 @@
-{"name":"spriteware-videojs-skins","version":"1.0.0","private":true,"type":"module","license":"Apache-2.0","scripts":{"dev":"vite --host 127.0.0.1","build":"vite build","test":"node --test tests/*.test.js"},"dependencies":{"@videojs/html":"10.4.0","vite":"^7.0.0"}}
+{
+  "name": "spriteware-videojs-skins",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "playwright test"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/mount.js"
+    },
+    "./skin.css": "./src/skin.css",
+    "./themes/*": "./src/themes/*.js"
+  },
+  "files": [
+    "src",
+    "public/themes",
+    "README.md",
+    "LICENSE",
+    "NOTICE.md"
+  ],
+  "description": "Three image-backed skins with a scoped mount/dispose API for Video.js 10",
+  "peerDependencies": {
+    "@videojs/html": "^10.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@videojs/html": "10.4.0",
+    "vite": "^7.0.0"
+  }
+}

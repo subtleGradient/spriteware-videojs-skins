@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Independent host integration</title><style>
+body{margin:24px;background:#f6f1e9;color:#29231d;font:16px Georgia,serif}header{border-bottom:3px solid #794522;padding:12px}h1{font:28px Georgia}button{font:inherit}main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;max-width:1000px}.host-player{max-width:450px}#host-control{padding:12px;background:#fff;border:2px solid #794522}#log{white-space:pre-wrap}@media(max-width:700px){main{grid-template-columns:1fr}}
+</style></head><body><header><h1>My unrelated website</h1><p>The player must not replace this heading, font, background, or page title.</p></header><p><button id="host-control">Host button</button> <button id="dispose">Dispose second player</button> <button id="remount">Recreate second player</button></p><main><section><h2>Liquid Orbit</h2><div id="one" class="host-player"><p class="preserved">Existing host content stays.</p></div></section><section><h2>BIOPOD</h2><div id="two" class="host-player"></div></section></main><p id="log" role="status">Ready to mount.</p><script type="module">
+import {mountSpriteware} from '../src/mount.js';
+const base=import.meta.env.BASE_URL;
+const options={theme:'liquid',src:base+'media/aqua-motion.mp4?instance=first',poster:base+'media/poster.jpg',title:'My own film',captions:[{src:base+'media/captions.vtt',language:'en',label:'Host captions'}],chapters:[{time:0,label:'Opening'},{time:12,label:'Second half'}]};
+const one=mountSpriteware(document.querySelector('#one'),options);
+const createSecond=()=>mountSpriteware(document.querySelector('#two'),{theme:'biopod',src:base+'media/aqua-motion.mp4?instance=second',title:'A different source URL'});
+let two=createSecond();
+const log=document.querySelector('#log');
+document.querySelector('#host-control').onclick=()=>log.textContent='Unrelated host button works.';
+document.querySelector('#dispose').onclick=()=>{two?.dispose();two=null;log.textContent='Second player disposed; first player remains.'};
+document.querySelector('#remount').onclick=()=>{two?.dispose();two=createSecond();log.textContent='Second player recreated.'};
+window.embedTest={one,get two(){return two},mountSpriteware,options};
+await Promise.all([one.ready,two.ready]);log.textContent='Both players ready. Each owns its media, controls and lifecycle.';
+</script></body></html>

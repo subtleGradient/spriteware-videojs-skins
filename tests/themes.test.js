@@ -7,4 +7,4 @@ for(const theme of [nebula,biopod,liquid]){
   for(const c of theme.controls)for(const state of ['normal','hover','pressed','focus','disabled'])assert.ok(existsSync(new URL('../public/'+theme.assetRoot+(c.asset||c.id)+'-'+state+'.png',import.meta.url)));
  });
 }
-test('All themes remain a theme of the one engine',()=>{const s=readFileSync(new URL('../src/player.js',import.meta.url),'utf8');assert.match(s,/const themes=\{nebula,biopod,liquid\}/);assert.doesNotMatch(s,/theme.filename/);assert.match(s,/currentMediaTitle/);assert.equal((s.match(/video-player id=/g)||[]).length,1)});
+test('All themes remain a theme of the one engine',()=>{const s=readFileSync(new URL('../src/mount.js',import.meta.url),'utf8');assert.match(s,/export const spritewareThemes=\{nebula,biopod,liquid\}/);assert.doesNotMatch(s,/theme.filename/);assert.match(s,/currentMediaTitle/);assert.equal((s.match(/video-player data-sw=/g)||[]).length,1)});

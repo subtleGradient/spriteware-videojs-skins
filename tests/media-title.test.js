@@ -17,7 +17,7 @@ test('safe fallback for missing, directory and non-file source forms',()=>{
 });
 test('untrusted title is literal text and integration never interpolates it as HTML',()=>{
  assert.equal(mediaTitle({title:'<img src=x onerror=alert(1)>'}),'<img src=x onerror=alert(1)>');
- const source=readFileSync(new URL('../src/player.js',import.meta.url),'utf8');
+ const source=readFileSync(new URL('../src/mount.js',import.meta.url),'utf8');
  assert.match(source,/<span class="title-readout"><\/span>/);
  assert.match(source,/\$\('\.title-readout'\)\.textContent=currentMediaTitle\(\)/);
  assert.doesNotMatch(source,/theme\.filename|nebula_pop\.mpg|cosmic_drift\.avi|bio_rhythm\.mov/);

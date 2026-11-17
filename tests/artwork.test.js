@@ -7,3 +7,8 @@ test('load works on browsers without Image.decode',async()=>{const x=setup();x.f
 test('broken cached image exposes operable native video instead of an invisible scene',async()=>{const x=setup({complete:true,naturalWidth:0});assert.equal(await x.ready,false);assert.equal(x.scene.dataset.artwork,'error');assert.equal(x.video.controls,true);assert.equal(x.video.tabIndex,0);assert.match(x.errors[0],/Native video controls/)});
 test('network image failure resolves once and enables native controls',async()=>{const x=setup();x.frame.dispatchEvent(new Event('error'));x.frame.dispatchEvent(new Event('error'));assert.equal(await x.ready,false);assert.equal(x.errors.length,1);assert.equal(x.video.controls,true)});
 test('decode rejection and synchronous decode exception both fall back',async()=>{for(const decode of [()=>Promise.reject(new Error('bad image')),()=>{throw new Error('bad image')}]){const x=setup({complete:true,naturalWidth:1086,decode});assert.equal(await x.ready,false);assert.equal(x.scene.dataset.artwork,'error')}});
+test('aborted preparation resolves without native fallback or stale decode mutation',async()=>{
+ const frame=new EventTarget();frame.complete=false;frame.naturalWidth=100;let resolveDecode;frame.decode=()=>new Promise(r=>resolveDecode=r);
+ const scene={dataset:{}},video={controls:false,tabIndex:-1},controller=new AbortController();let errors=0;
+ const ready=prepareArtwork({frame,scene,video,signal:controller.signal,onError:()=>errors++});frame.dispatchEvent(new Event('load'));controller.abort();assert.equal(await ready,false);resolveDecode();await Promise.resolve();assert.equal(scene.dataset.artwork,'loading');assert.equal(video.controls,false);assert.equal(errors,0);
+});

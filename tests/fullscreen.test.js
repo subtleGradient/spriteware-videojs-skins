@@ -53,3 +53,10 @@ test('late native entry without an exit API keeps working native controls and ex
  x.video.webkitDisplayingFullscreen=false;x.video.dispatchEvent(new Event('webkitendfullscreen'));
  assert.equal(x.labels.at(-1),'Enter fullscreen');assert.equal(x.video.controls,false);
 });
+test('dispose clears pending fallback and restores without refocusing a removed player',()=>{
+ const x=setup();x.video.webkitEnterFullscreen=()=>{};x.c.toggle();assert.equal(x.c.mode,'pending');x.c.dispose();x.c.dispose();x.tick();assert.equal(x.c.mode,'inline');assert.equal(x.video.controls,false);x.c.toggle();assert.equal(x.c.mode,'inline');
+ x.video.dispatchEvent(new Event('webkitbeginfullscreen'));x.doc.dispatchEvent(new Event('fullscreenchange'));assert.equal(x.c.mode,'inline');
+});
+test('dispose leaves another player fullscreen alone',()=>{
+ const x=setup();const other={};x.doc.fullscreenElement=other;x.doc.exitFullscreen=()=>assert.fail('must not exit another player');x.c.dispose();assert.equal(x.doc.fullscreenElement,other);
+});

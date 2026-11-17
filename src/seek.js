@@ -7,6 +7,8 @@ export function seekFraction(clientX,clientY,rect,theme){
  return v<1e-9?0:v>1-1e-9?1:v;
 }
 export function bindSeekPointer(input,scene,theme,{duration,seek,dragging}){
+ const listeners=[];
+ const on=(type,fn)=>{input.addEventListener(type,fn);listeners.push([type,fn])};
  let pointer=null;
  const update=e=>{
   const d=duration();if(!Number.isFinite(d)||d<=0)return;
@@ -19,15 +21,16 @@ export function bindSeekPointer(input,scene,theme,{duration,seek,dragging}){
   if(input.hasPointerCapture(id))input.releasePointerCapture(id);
   delete input.dataset.pressed;dragging(false);
  };
- input.addEventListener('pointerdown',e=>{
+ on('pointerdown',e=>{
   if(input.disabled||e.isPrimary===false||e.button!==0||!Number.isFinite(duration())||duration()<=0)return;
   e.preventDefault();input.focus({preventScroll:true});pointer=e.pointerId;
   input.setPointerCapture(pointer);input.dataset.pressed='true';dragging(true);update(e);
  });
- input.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;e.preventDefault();update(e)});
- input.addEventListener('pointerup',e=>{if(e.pointerId!==pointer)return;update(e);finish()});
- input.addEventListener('pointercancel',e=>{if(e.pointerId===pointer)finish()});
- input.addEventListener('lostpointercapture',finish);input.addEventListener('blur',finish);
- input.addEventListener('click',e=>e.stopPropagation());
+ on('pointermove',e=>{if(e.pointerId!==pointer)return;e.preventDefault();update(e)});
+ on('pointerup',e=>{if(e.pointerId!==pointer)return;update(e);finish()});
+ on('pointercancel',e=>{if(e.pointerId===pointer)finish()});
+ on('lostpointercapture',finish);on('blur',finish);
+ on('click',e=>e.stopPropagation());
+ finish.dispose=()=>{finish();for(const [type,fn] of listeners)input.removeEventListener(type,fn)};
  return finish;
 }

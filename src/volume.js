@@ -22,17 +22,20 @@ export function applyMediaVolume(video,value) {
  return true;
 }
 export function bindVolumePointer(input,scene,theme,apply) {
+ const listeners=[];
+ const on=(type,fn)=>{input.addEventListener(type,fn);listeners.push([type,fn])};
  let pointer=null;
  const update=e=>apply(volumeAtPoint(e.clientX,e.clientY,scene.getBoundingClientRect(),theme));
- input.addEventListener('pointerdown',e=>{
+ on('pointerdown',e=>{
   if(e.isPrimary===false||e.button!==0)return;
   e.preventDefault();input.focus({preventScroll:true});pointer=e.pointerId;
   input.setPointerCapture(pointer);update(e);
  });
- input.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;e.preventDefault();update(e)});
+ on('pointermove',e=>{if(e.pointerId!==pointer)return;e.preventDefault();update(e)});
  const finish=e=>{if(e.pointerId!==pointer)return;if(input.hasPointerCapture(pointer))input.releasePointerCapture(pointer);pointer=null};
- input.addEventListener('pointerup',finish);input.addEventListener('pointercancel',finish);
- input.addEventListener('lostpointercapture',()=>pointer=null);
+ on('pointerup',finish);on('pointercancel',finish);
+ on('lostpointercapture',()=>pointer=null);
  // A drag ending by the speaker must never become a mute click.
- input.addEventListener('click',e=>e.stopPropagation());
+ on('click',e=>e.stopPropagation());
+ return ()=>{if(pointer!==null&&input.hasPointerCapture(pointer))input.releasePointerCapture(pointer);pointer=null;for(const [type,fn] of listeners)input.removeEventListener(type,fn)};
 }

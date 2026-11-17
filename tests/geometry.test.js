@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,existsSync} from 'node:fs';import theme from '../src/themes/nebula.js';
-const source=readFileSync(new URL('../src/player.js',import.meta.url),'utf8');
+const source=readFileSync(new URL('../src/mount.js',import.meta.url),'utf8');
 const fullscreenSource=readFileSync(new URL('../src/fullscreen.js',import.meta.url),'utf8');
 test('one canonical scene and native Video.js10 player',()=>{assert.equal(theme.width,1086);assert.equal(theme.height,1448);assert.match(source,/@videojs\/html\/video\/player/);assert.match(source,/const attempt=video.play\(\)/);assert.doesNotMatch(source,/getContext|requestAnimationFrame|WebGLRenderingContext/)});
 test('all theme artwork states exist at registered fixed dimensions',()=>{for(const c of theme.controls)for(const state of ['normal','hover','pressed','focus','disabled'])assert.ok(existsSync(new URL('../public/'+theme.assetRoot+(c.asset||c.id)+'-'+state+'.png',import.meta.url)))});

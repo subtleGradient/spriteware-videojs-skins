@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const css=readFileSync(new URL('../src/style.css',import.meta.url),'utf8');
-const js=readFileSync(new URL('../src/player.js',import.meta.url),'utf8');
+const js=readFileSync(new URL('../src/mount.js',import.meta.url),'utf8');
 test('hover label contrast is theme scoped, not shared lime text on purple',()=>{
  assert.match(js,/scene.dataset.theme=theme.id/);
  assert.match(css,/\.scene\[data-theme=nebula\] \.control:hover \.pill-label\{color:#233000\}/);
