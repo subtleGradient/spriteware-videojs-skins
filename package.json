@@ -1,0 +1,1 @@
+{"name":"spriteware-videojs-skins","version":"1.0.0","private":true,"type":"module","license":"Apache-2.0","scripts":{"dev":"vite --host 127.0.0.1","build":"vite build","test":"node --test tests/*.test.js"},"dependencies":{"@videojs/html":"10.4.0","vite":"^7.0.0"}}

@@ -1,0 +1,107 @@
+{
+  "canvas": [
+    1086,
+    1448
+  ],
+  "regions": {
+    "previous": [
+      "ellipse",
+      [
+        115,
+        1005,
+        246,
+        1128
+      ]
+    ],
+    "play": [
+      "ellipse",
+      [
+        249,
+        978,
+        480,
+        1155
+      ]
+    ],
+    "pause": [
+      "ellipse",
+      [
+        481,
+        1007,
+        606,
+        1130
+      ]
+    ],
+    "stop": [
+      "ellipse",
+      [
+        608,
+        1007,
+        736,
+        1130
+      ]
+    ],
+    "next": [
+      "ellipse",
+      [
+        735,
+        1006,
+        867,
+        1131
+      ]
+    ],
+    "chapters": [
+      "rounded",
+      [
+        145,
+        1170,
+        376,
+        1257
+      ]
+    ],
+    "captions": [
+      "rounded",
+      [
+        375,
+        1169,
+        607,
+        1258
+      ]
+    ],
+    "chapter-step": [
+      "rounded",
+      [
+        607,
+        1170,
+        873,
+        1258
+      ]
+    ]
+  },
+  "states": {
+    "normal": {
+      "raw_outside_mask_changed_pixels": 0,
+      "registered_outside_mask_changed_pixels": 0,
+      "max_outside_difference": 0
+    },
+    "hover": {
+      "raw_outside_mask_changed_pixels": 1009955,
+      "registered_outside_mask_changed_pixels": 0,
+      "max_outside_difference": 0
+    },
+    "pressed": {
+      "raw_outside_mask_changed_pixels": 768171,
+      "registered_outside_mask_changed_pixels": 0,
+      "max_outside_difference": 0
+    },
+    "focus": {
+      "raw_outside_mask_changed_pixels": 745203,
+      "registered_outside_mask_changed_pixels": 0,
+      "max_outside_difference": 0
+    },
+    "disabled": {
+      "raw_outside_mask_changed_pixels": 754969,
+      "registered_outside_mask_changed_pixels": 0,
+      "max_outside_difference": 0
+    }
+  }
+}
