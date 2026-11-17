@@ -1,5 +1,9 @@
 # Spriteware
 
+![Liquid Orbit, Nebula Pop, and BIOPOD running on Video.js v10](public/images/spriteware-three-skins.jpg)
+
+[Download the project image](https://subtlegradient.github.io/spriteware-videojs-skins/images/spriteware-three-skins.jpg)
+
 Illustrated player skins for Video.js v10. One shared player; artwork and layout supplied by theme manifests.
 
 ## Nebula Pop
