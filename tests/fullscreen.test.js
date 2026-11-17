@@ -19,3 +19,37 @@ test('iPad prefers native video presenter when both fullscreen APIs exist',()=>{
 test('unsupported native video presenter still allows standard video fullscreen',()=>{const x=setup();x.video.webkitSupportsFullscreen=false;x.video.webkitEnterFullscreen=()=>assert.fail('unsupported native API');x.video.requestFullscreen=()=>{x.doc.fullscreenElement=x.video;x.doc.dispatchEvent(new Event('fullscreenchange'));return Promise.resolve()};x.c.toggle();assert.equal(x.c.mode,'native')});
 
 test('closing expanded fallback clears its stale status message',()=>{const x=setup();x.c.toggle();assert.ok(x.messages.at(-1));x.c.exit();assert.equal(x.messages.at(-1),'');assert.equal(x.c.mode,'inline')});
+
+test('cancel pending Safari entry safely exits a late native begin with controls intact',()=>{
+ const x=setup();let exits=0;x.video.webkitEnterFullscreen=()=>{};
+ x.video.webkitExitFullscreen=()=>{exits++;assert.equal(x.video.controls,true)};
+ x.c.toggle();x.c.exit();assert.equal(x.c.mode,'inline');assert.equal(x.video.controls,false);
+ x.video.webkitDisplayingFullscreen=true;x.video.dispatchEvent(new Event('webkitbeginfullscreen'));
+ assert.equal(exits,1);assert.equal(x.c.mode,'native');assert.equal(x.video.controls,true);
+ x.video.webkitDisplayingFullscreen=false;x.video.dispatchEvent(new Event('webkitendfullscreen'));
+ assert.equal(x.c.mode,'inline');assert.equal(x.video.controls,false);assert.equal(x.labels.at(-1),'Enter fullscreen');
+});
+test('late native entry can synchronously exit without leaving stale controls or label',()=>{
+ const x=setup();x.video.webkitEnterFullscreen=()=>{};
+ x.video.webkitExitFullscreen=()=>{x.video.webkitDisplayingFullscreen=false;x.video.dispatchEvent(new Event('webkitendfullscreen'))};
+ x.c.toggle();x.c.exit();x.video.webkitDisplayingFullscreen=true;x.video.dispatchEvent(new Event('webkitbeginfullscreen'));
+ assert.equal(x.c.mode,'inline');assert.equal(x.video.controls,false);assert.equal(x.labels.at(-1),'Enter fullscreen');
+});
+test('cancelled standard promise cannot reopen fallback during a newer request',async()=>{
+ const x=setup();let rejectOld;x.video.requestFullscreen=()=>new Promise((_,reject)=>rejectOld=reject);
+ x.c.toggle();x.c.exit();x.video.requestFullscreen=()=>new Promise(()=>{});x.c.toggle();
+ rejectOld(Error('old request'));await Promise.resolve();assert.equal(x.c.mode,'pending');
+});
+test('late standard fullscreen after pending cancellation requests exit',()=>{
+ const x=setup();let exits=0;x.video.requestFullscreen=()=>new Promise(()=>{});
+ x.doc.exitFullscreen=()=>{exits++;x.doc.fullscreenElement=null;x.doc.dispatchEvent(new Event('fullscreenchange'));return Promise.resolve()};
+ x.c.toggle();x.c.exit();x.doc.fullscreenElement=x.video;x.doc.dispatchEvent(new Event('fullscreenchange'));
+ assert.equal(exits,1);assert.equal(x.c.mode,'inline');assert.equal(x.labels.at(-1),'Enter fullscreen');
+});
+test('late native entry without an exit API keeps working native controls and explains exit',()=>{
+ const x=setup();x.video.webkitEnterFullscreen=()=>{};x.c.toggle();x.c.exit();
+ x.video.webkitDisplayingFullscreen=true;x.video.dispatchEvent(new Event('webkitbeginfullscreen'));
+ assert.equal(x.c.mode,'native');assert.equal(x.video.controls,true);assert.match(x.messages.at(-1),/native exit/);
+ x.video.webkitDisplayingFullscreen=false;x.video.dispatchEvent(new Event('webkitendfullscreen'));
+ assert.equal(x.labels.at(-1),'Enter fullscreen');assert.equal(x.video.controls,false);
+});

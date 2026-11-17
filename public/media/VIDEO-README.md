@@ -4,7 +4,7 @@ Original procedural test footage generated for Tom's aqua Y2K Video.js skin prot
 
 - `aqua-motion.mp4`: 24 seconds, 960 × 540, 24 fps, H.264/yuv420p, SDR, stereo AAC. Fast-start metadata. Loop-ready periodic animation.
 - `poster.jpg`: frame at 4 seconds.
-- `generate.py`: complete reproducible source. Requires Python, NumPy, and FFmpeg.
+- `generate-video.py`: complete reproducible source. Requires Python, NumPy, and FFmpeg.
 - Audio is an intentionally quiet, original synthesized ambient chord. Start muted in the browser; allow user-controlled sound.
 
 No third-party video, music, images, fonts, or samples were used. This generated asset can be bundled with this prototype and its submission; no external stock attribution or music license is required. It is NOT an HDR video or evidence of HDR display output. Bundle same-origin to avoid cross-origin restrictions when drawing video frames into canvas/WebGL.

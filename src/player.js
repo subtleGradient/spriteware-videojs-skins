@@ -1,3 +1,5 @@
+import {mediaChapters,currentChapter,chapterDestination,repeatedToggle} from './chapters.js';
+import {prepareArtwork} from './artwork.js';
 import {mediaTitle} from './media-title.js';
 import {bindSeekPointer} from './seek.js';
 import {supportsMediaVolume,applyMediaVolume,bindVolumePointer} from './volume.js';
@@ -18,10 +20,12 @@ const themeNav=document.createElement('nav');themeNav.setAttribute('aria-label',
 for(const entry of Object.values(themes)){const link=document.createElement('a');link.href='?skin='+entry.id;link.textContent=entry.name;if(entry.id===theme.id)link.setAttribute('aria-current','page');themeNav.append(link,document.createTextNode(' · '))}
 document.querySelector('.notes').append(themeNav);
 const mount=document.querySelector('#mount');
-mount.innerHTML=`<video-player id="player"><section class="scene" aria-label="${theme.name} video player"><div class="aperture"><media-container><video id="video" playsinline preload="metadata" tabindex="-1" src="${asset('media/aqua-motion.mp4')}" poster="${asset('media/poster.jpg')}"><track kind="captions" srclang="en" label="Visual descriptions" src="${asset('media/captions.vtt')}"></video></media-container><p id="screen-error" role="status"></p></div><img class="frame" width="${theme.width}" height="${theme.height}" alt="" fetchpriority="high" src="${asset(theme.frame)}"><span class="title-readout"></span><span class="time-readout" aria-live="off">00:00 / 00:24</span><div class="chapter-menu" hidden><strong>CHAPTERS</strong><button data-time="0">01 · Chromatic drift</button><button data-time="8">02 · Pearl current</button><button data-time="16">03 · Prismatic tide</button><button id="close-chapters">Close</button></div></section></video-player>`;
+mount.innerHTML=`<video-player id="player"><section class="scene" data-artwork="loading" aria-label="${theme.name} video player"><div class="aperture"><media-container><video id="video" playsinline preload="metadata" tabindex="-1" src="${asset('media/aqua-motion.mp4')}" poster="${asset('media/poster.jpg')}"><track kind="captions" srclang="en" label="Visual descriptions" src="${asset('media/captions.vtt')}"></video></media-container><p id="screen-error" role="status"></p></div><img class="frame" width="${theme.width}" height="${theme.height}" alt="" fetchpriority="high" src="${asset(theme.frame)}"><span class="title-readout"></span><span class="time-readout" aria-live="off">00:00 / 00:00</span><div class="chapter-menu" hidden><strong>CHAPTERS</strong><button id="close-chapters">Close</button></div></section></video-player>`;
 const $=s=>document.querySelector(s),scene=$('.scene'),video=$('#video'),player=$('#player');
 const currentMediaTitle=()=>mediaTitle({title:video.getAttribute('data-title')||video.getAttribute('title'),currentSrc:video.currentSrc,src:video.getAttribute('src')||video.querySelector('source')?.getAttribute('src'),baseURI:document.baseURI});
 $('.title-readout').textContent=currentMediaTitle();
+prepareArtwork({frame:$('.frame'),scene,video,onError:message=>{$('#notice').textContent=message}});
+scene.dataset.theme=theme.id;
 scene.style.aspectRatio=`${theme.width}/${theme.height}`;
 function place(el,[x,y,w,h]){Object.assign(el.style,{left:`${x/theme.width*100}%`,top:`${y/theme.height*100}%`,width:`${w/theme.width*100}%`,height:`${h/theme.height*100}%`})}
 place($('.aperture'),theme.aperture.box);$('.aperture').style.clipPath=theme.aperture.polygon;
@@ -47,24 +51,32 @@ $('.chapter-menu').setAttribute('role','dialog');$('.chapter-menu').setAttribute
 $('.chapter-menu').querySelectorAll('button').forEach(b=>b.tabIndex=0);
 await customElements.whenDefined('video-player');let volumeWritable=supportsMediaVolume(video);if(volumeWritable)video.volume=.65;
 const fmt=t=>`${String(Math.floor((t||0)/60)).padStart(2,'0')}:${String(Math.floor((t||0)%60)).padStart(2,'0')}`;
-let seeking=false,buffering=false;
+let seeking=false,buffering=false,chapters=[],chapterSignature='';
 function sync(){
- $('.time-readout').textContent=`${fmt(video.currentTime)} / ${fmt(Number.isFinite(video.duration)?video.duration:24)}`;
- const ready=Number.isFinite(video.duration);$('#seek').disabled=!ready;$('#seek').max=ready?video.duration:24;if(!seeking)$('#seek').value=video.currentTime;$('#seek').setAttribute('aria-valuetext',`${fmt(video.currentTime)} of ${fmt(video.duration)}`);$('#seek').draw();
+ const nextChapters=mediaChapters(video.currentSrc||video.getAttribute('src'),video.duration),signature=JSON.stringify(nextChapters);
+ if(signature!==chapterSignature){
+  const menu=$('.chapter-menu'),focused=menu.contains(document.activeElement);chapters=nextChapters;chapterSignature=signature;
+  menu.querySelectorAll('[data-time]').forEach(b=>b.remove());
+  for(const chapter of chapters){const b=document.createElement('button');b.type='button';b.dataset.time=String(chapter.time);b.textContent=chapter.label;menu.insertBefore(b,$('#close-chapters'))}
+  if(focused)closeMenu();
+ }
+ $('#chapters').disabled=!chapters.length;
+
+ $('.time-readout').textContent=`${fmt(video.currentTime)} / ${fmt(Number.isFinite(video.duration)?video.duration:0)}`;
+ const ready=Number.isFinite(video.duration)&&video.duration>0;$('#seek').disabled=!ready;$('#seek').max=ready?video.duration:24;if(!seeking)$('#seek').value=video.currentTime;$('#seek').setAttribute('aria-valuetext',`${fmt(video.currentTime)} of ${fmt(video.duration)}`);$('#seek').draw();
  $('#volume').value=video.muted?0:video.volume;$('#volume').setAttribute('aria-valuetext',volumeWritable?`${Math.round((video.muted?0:video.volume)*100)} percent`:'Use device volume buttons');$('#volume').setAttribute('aria-disabled',String(!volumeWritable));$('#volume').draw();
  $('#mute').setAttribute('aria-label',video.muted?'Unmute':'Mute');$('#mute').setAttribute('aria-pressed',String(video.muted));
  $('#play').dataset.latched=String(!video.paused);$('#pause').dataset.latched=String(video.paused&&video.currentTime>0);
  const cc=[...video.textTracks].some(t=>t.kind==='captions'&&t.mode==='showing');$('#captions').setAttribute('aria-pressed',String(cc));
- $('.chapter-menu').querySelectorAll('[data-time]').forEach(b=>b.setAttribute('aria-current',String(Math.floor(video.currentTime/8)*8===+b.dataset.time)));
- $('#previous').disabled=video.currentTime<.2;$('#next').disabled=video.currentTime>=16;
+ $('.chapter-menu').querySelectorAll('[data-time]').forEach((b,i)=>b.setAttribute('aria-current',String(currentChapter(chapters,video.currentTime)===i)));
+ $('#previous').disabled=!chapters.length||video.currentTime<.2;$('#next').disabled=!chapters.length||currentChapter(chapters,video.currentTime)===chapters.length-1;
  $('.title-readout').textContent=video.error?'TRANSMISSION ERROR':buffering&&!video.paused?'BUFFERING…':currentMediaTitle();
 }
 $('#play').onclick=()=>{const attempt=video.play();attempt?.catch(()=>{$('#screen-error').textContent='Playback was blocked. Tap Play to try again.'});sync()};
 $('#pause').onclick=()=>{video.pause();sync()};
 const seek=t=>{if(!Number.isFinite(video.duration))return;video.currentTime=Math.max(0,Math.min(video.duration,t));sync()};
 $('#stop').onclick=()=>{video.pause();seek(0)};
-$('#previous').onclick=()=>seek(video.currentTime%8>2?Math.floor(video.currentTime/8)*8:Math.max(0,Math.floor(video.currentTime/8)-1)*8);
-$('#next').onclick=()=>seek(Math.min(16,(Math.floor(video.currentTime/8)+1)*8));
+for(const [id,direction] of [['previous',-1],['next',1]])$('#'+id).onclick=()=>{const target=chapterDestination(chapters,video.currentTime,direction);if(target!==null)seek(target)};
 $('#mute').onclick=()=>{video.muted=!video.muted;sync()};
 function changeVolume(value){
  if(!volumeWritable||!applyMediaVolume(video,value)){volumeWritable=false;$('#notice').textContent='This device controls sound level with its volume buttons. The speaker button still mutes and unmutes.'}
@@ -92,6 +104,7 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'){if(!$('.chapter-menu').hidden){e.preventDefault();closeMenu()}else if(videoFullscreen.active){e.preventDefault();videoFullscreen.exit()}}
  if((e.key===' '||e.key==='Enter')&&e.target.matches('button')){if(e.repeat){e.preventDefault();return}if(e.target.matches('.control'))e.target.dataset.held='true'}
  if(!scene.contains(e.target)||e.target.matches('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey||!$('.chapter-menu').hidden)return;
+ if(repeatedToggle(e.key,e.repeat)){e.preventDefault();return}
  if(e.key.toLowerCase()==='k'){e.preventDefault();video.paused?$('#play').click():$('#pause').click()}
  if(e.key.toLowerCase()==='m'){e.preventDefault();$('#mute').click()}
  if(e.key.toLowerCase()==='f'){e.preventDefault();$('#fullscreen').click()}

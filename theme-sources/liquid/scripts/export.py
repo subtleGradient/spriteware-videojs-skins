@@ -31,7 +31,7 @@ for state in ['normal','hover','pressed','focus','disabled']:
 allowed.save(root/'proof/permitted-regions.png')
 json.dump(report,open(root/'proof/registration-report.json','w'),indent=2)
 # Static composition for visual review. It does not assert browser rendering.
-back=Image.new('RGBA',normal.size,(4,10,20,255));poster=Image.open('/workspace/shared/aquadeck/public/assets/poster.jpg').convert('RGBA');poster.thumbnail((665,444));back.alpha_composite(poster,(258+(665-poster.width)//2,366+(444-poster.height)//2));back.alpha_composite(normal)
+back=Image.new('RGBA',normal.size,(4,10,20,255));poster=Image.open(root/'proof/demo-poster.jpg').convert('RGBA');poster.thumbnail((665,444));back.alpha_composite(poster,(258+(665-poster.width)//2,366+(444-poster.height)//2));back.alpha_composite(normal)
 for name,center,size in [('seek',(473,930),60),('volume',(1003,813),50)]:back.alpha_composite(Image.open(out/f'{name}-normal.png'),(center[0]-size//2,center[1]-size//2))
 back.save(root/'proof/static-composition.png');back.resize((390,520),Image.Resampling.LANCZOS).save(root/'proof/static-mobile390.png');back.resize((320,427),Image.Resampling.LANCZOS).save(root/'proof/static-mobile320.png')
 print(json.dumps(report,indent=2))
