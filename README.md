@@ -18,13 +18,19 @@ npm test
 npm run build
 ```
 
+## BIOPOD
+
+Ultraviolet glass and silver ribs, with a sculptural shell and oversized Play control.
+
+**[Play BIOPOD](https://subtlegradient.github.io/spriteware-videojs-skins/?skin=biopod)**
+
 ## Controls
 
 Play and Pause are separate buttons. Tab between controls; Enter or Space activates buttons. Timeline arrows seek five seconds, Home and End jump to either end, and Escape closes chapter selection. iPhone may use native fullscreen and hardware volume.
 
 ## Themes
 
-`src/player.js` contains the shared player. `src/themes/nebula.js` maps artwork and hit regions onto one coordinate system. Assets live in `public/themes/nebula`. New themes swap artwork and geometry, not playback code.
+`src/player.js` contains the shared player. Theme manifests in `src/themes/` map artwork and hit regions onto one coordinate system. Assets live in `public/themes/`. New themes swap artwork and geometry, not playback code.
 
 No WebGL, canvas effects, autoplay, or duplicate mobile toolbar.
 

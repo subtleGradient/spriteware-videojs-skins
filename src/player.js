@@ -1,11 +1,19 @@
 import '@videojs/html/video/player';
 import '@videojs/html/ui/container';
 import nebula from './themes/nebula.js';
+import biopod from './themes/biopod.js';
 import './style.css';
-const themes={nebula},theme=themes[new URLSearchParams(location.search).get('skin')]||nebula;
+const themes={nebula,biopod},theme=themes[new URLSearchParams(location.search).get('skin')]||nebula;
 const base=import.meta.env.BASE_URL,asset=p=>base+p;
+document.title=theme.name+' · Spriteware';
+document.querySelector('h1').textContent=theme.name;
+document.querySelector('header p:last-child').textContent=theme.subtitle;
+const filename=theme.filename||'nebula_pop.mpg';
+const themeNav=document.createElement('nav');themeNav.setAttribute('aria-label','Player skins');
+for(const entry of Object.values(themes)){const link=document.createElement('a');link.href='?skin='+entry.id;link.textContent=entry.name;if(entry.id===theme.id)link.setAttribute('aria-current','page');themeNav.append(link,document.createTextNode(' · '))}
+document.querySelector('.notes').append(themeNav);
 const mount=document.querySelector('#mount');
-mount.innerHTML=`<video-player id="player"><section class="scene" aria-label="${theme.name} video player"><div class="aperture"><media-container><video id="video" playsinline preload="metadata" tabindex="-1" src="${asset('media/aqua-motion.mp4')}" poster="${asset('media/poster.jpg')}"><track kind="captions" srclang="en" label="Visual descriptions" src="${asset('media/captions.vtt')}"></video></media-container><p id="screen-error" role="status"></p></div><img class="frame" width="${theme.width}" height="${theme.height}" alt="" fetchpriority="high" src="${asset(theme.frame)}"><span class="title-readout">nebula_pop.mpg</span><span class="time-readout" aria-live="off">00:00 / 00:24</span><div class="chapter-menu" hidden><strong>CHAPTERS</strong><button data-time="0">01 · Chromatic drift</button><button data-time="8">02 · Pearl current</button><button data-time="16">03 · Prismatic tide</button><button id="close-chapters">Close</button></div></section></video-player>`;
+mount.innerHTML=`<video-player id="player"><section class="scene" aria-label="${theme.name} video player"><div class="aperture"><media-container><video id="video" playsinline preload="metadata" tabindex="-1" src="${asset('media/aqua-motion.mp4')}" poster="${asset('media/poster.jpg')}"><track kind="captions" srclang="en" label="Visual descriptions" src="${asset('media/captions.vtt')}"></video></media-container><p id="screen-error" role="status"></p></div><img class="frame" width="${theme.width}" height="${theme.height}" alt="" fetchpriority="high" src="${asset(theme.frame)}"><span class="title-readout">${filename}</span><span class="time-readout" aria-live="off">00:00 / 00:24</span><div class="chapter-menu" hidden><strong>CHAPTERS</strong><button data-time="0">01 · Chromatic drift</button><button data-time="8">02 · Pearl current</button><button data-time="16">03 · Prismatic tide</button><button id="close-chapters">Close</button></div></section></video-player>`;
 const $=s=>document.querySelector(s),scene=$('.scene'),video=$('#video'),player=$('#player');
 scene.style.aspectRatio=`${theme.width}/${theme.height}`;
 function place(el,[x,y,w,h]){Object.assign(el.style,{left:`${x/theme.width*100}%`,top:`${y/theme.height*100}%`,width:`${w/theme.width*100}%`,height:`${h/theme.height*100}%`})}
@@ -42,7 +50,7 @@ function sync(){
  const cc=[...video.textTracks].some(t=>t.kind==='captions'&&t.mode==='showing');$('#captions').setAttribute('aria-pressed',String(cc));
  $('.chapter-menu').querySelectorAll('[data-time]').forEach(b=>b.setAttribute('aria-current',String(Math.floor(video.currentTime/8)*8===+b.dataset.time)));
  $('#previous').disabled=video.currentTime<.2;$('#next').disabled=video.currentTime>=16;
- $('.title-readout').textContent=video.error?'TRANSMISSION ERROR':buffering&&!video.paused?'BUFFERING…':'nebula_pop.mpg';
+ $('.title-readout').textContent=video.error?'TRANSMISSION ERROR':buffering&&!video.paused?'BUFFERING…':filename;
 }
 $('#play').onclick=()=>{const attempt=video.play();attempt?.catch(()=>{$('#screen-error').textContent='Playback was blocked. Tap Play to try again.'});sync()};
 $('#pause').onclick=()=>{video.pause();sync()};

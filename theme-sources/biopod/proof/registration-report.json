@@ -1,0 +1,106 @@
+{
+  "canvas": [
+    1086,
+    1448
+  ],
+  "regions": {
+    "previous": [
+      "ellipse",
+      [
+        170,
+        996,
+        294,
+        1107
+      ]
+    ],
+    "play": [
+      "ellipse",
+      [
+        318,
+        976,
+        502,
+        1126
+      ]
+    ],
+    "pause": [
+      "ellipse",
+      [
+        526,
+        998,
+        635,
+        1107
+      ]
+    ],
+    "stop": [
+      "ellipse",
+      [
+        660,
+        998,
+        770,
+        1107
+      ]
+    ],
+    "next": [
+      "ellipse",
+      [
+        795,
+        997,
+        909,
+        1108
+      ]
+    ],
+    "chapters": [
+      "rounded",
+      [
+        127,
+        1157,
+        371,
+        1226
+      ]
+    ],
+    "captions": [
+      "rounded",
+      [
+        396,
+        1157,
+        650,
+        1226
+      ]
+    ],
+    "fullscreen": [
+      "rounded",
+      [
+        673,
+        1157,
+        921,
+        1226
+      ]
+    ]
+  },
+  "states": {
+    "normal": {
+      "outside_changed": 0,
+      "inside_changed": 0
+    },
+    "hover": {
+      "outside_changed": 0,
+      "inside_changed": 109398
+    },
+    "pressed": {
+      "outside_changed": 0,
+      "inside_changed": 109401
+    },
+    "focus": {
+      "outside_changed": 0,
+      "inside_changed": 109444
+    },
+    "disabled": {
+      "outside_changed": 0,
+      "inside_changed": 109447
+    }
+  },
+  "alpha": {
+    "outer": 0,
+    "aperture": 0
+  }
+}
