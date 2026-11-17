@@ -7,7 +7,7 @@ const base=import.meta.env.BASE_URL,asset=p=>base+p;
 const mount=document.querySelector('#mount');
 mount.innerHTML=`<video-player id="player"><section class="scene" aria-label="${theme.name} video player"><div class="aperture"><media-container><video id="video" playsinline preload="metadata" src="${asset('media/aqua-motion.mp4')}" poster="${asset('media/poster.jpg')}"><track kind="captions" srclang="en" label="Visual descriptions" src="${asset('media/captions.vtt')}"></video></media-container><p id="screen-error" role="status"></p></div><img class="frame" width="${theme.width}" height="${theme.height}" alt="" fetchpriority="high" src="${asset(theme.frame)}"><span class="title-readout">nebula_pop.mpg</span><span class="time-readout" aria-live="off">00:00 / 00:24</span><div class="chapter-menu" hidden><strong>CHAPTERS</strong><button data-time="0">01 · Chromatic drift</button><button data-time="8">02 · Pearl current</button><button data-time="16">03 · Prismatic tide</button><button id="close-chapters">Close</button></div></section></video-player>`;
 const $=s=>document.querySelector(s),scene=$('.scene'),video=$('#video'),player=$('#player');
-scene.style.aspectRatio=`${theme.width}/${theme.height}`;
+scene.style.aspectRatio=`${theme.width}/${theme.height}`;player.style.setProperty("--scene-fit-width",`${theme.width/theme.height*100}dvh`);
 function place(el,[x,y,w,h]){Object.assign(el.style,{left:`${x/theme.width*100}%`,top:`${y/theme.height*100}%`,width:`${w/theme.width*100}%`,height:`${h/theme.height*100}%`})}
 place($('.aperture'),theme.aperture.box);$('.aperture').style.clipPath=theme.aperture.polygon;
 place($('.title-readout'),theme.title);place($('.time-readout'),theme.time);
@@ -35,6 +35,7 @@ function sync(){
  $('#mute').setAttribute('aria-label',video.muted?'Unmute':'Mute');$('#mute').setAttribute('aria-pressed',String(video.muted));
  $('#play').dataset.latched=String(!video.paused);$('#pause').dataset.latched=String(video.paused&&video.currentTime>0);
  const cc=[...video.textTracks].some(t=>t.kind==='captions'&&t.mode==='showing');$('#captions').setAttribute('aria-pressed',String(cc));
+ $('.chapter-menu').querySelectorAll('[data-time]').forEach(b=>b.setAttribute('aria-current',String(Math.floor(video.currentTime/8)*8===+b.dataset.time)));
  $('#previous').disabled=video.currentTime<.2;$('#next').disabled=video.currentTime>=16;
  $('.title-readout').textContent=video.error?'TRANSMISSION ERROR':buffering&&!video.paused?'BUFFERING…':'nebula_pop.mpg';
 }
@@ -53,9 +54,9 @@ $('#captions').onclick=()=>{const track=[...video.textTracks].find(t=>t.kind==='
 function closeMenu(){$('.chapter-menu').hidden=true;$('#chapters').setAttribute('aria-expanded','false');$('#chapters').focus()}
 $('#chapters').setAttribute('aria-expanded','false');$('#chapters').onclick=()=>{const open=$('.chapter-menu').hidden;$('.chapter-menu').hidden=!open;$('#chapters').setAttribute('aria-expanded',String(open));if(open)$('.chapter-menu button').focus()};
 $('.chapter-menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.time)seek(+b.dataset.time);closeMenu()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('.chapter-menu').hidden){e.preventDefault();closeMenu()}if((e.key===' '||e.key==='Enter')&&e.target.matches('.control'))e.target.dataset.held='true'});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('.chapter-menu').hidden){e.preventDefault();closeMenu()}else if(document.fullscreenElement){e.preventDefault();document.exitFullscreen().catch(()=>{$('#notice').textContent='Use the Fullscreen button to exit.'})}}if((e.key===' '||e.key==='Enter')&&e.target.matches('.control'))e.target.dataset.held='true'});
 const release=()=>document.querySelectorAll('[data-held]').forEach(b=>delete b.dataset.held);document.addEventListener('keyup',release);window.addEventListener('blur',release);document.addEventListener('focusout',release);
-$('#fullscreen').onclick=async()=>{$('#notice').textContent='';try{if(document.fullscreenElement)await document.exitFullscreen();else if(scene.requestFullscreen)await scene.requestFullscreen();else if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();else $('#notice').textContent='Fullscreen is unavailable in this browser.'}catch{$('#notice').textContent='Fullscreen could not open. Playback still works here.'}};
+$('#fullscreen').onclick=async()=>{$('#notice').textContent='';try{if(document.fullscreenElement)await document.exitFullscreen();else if(player.requestFullscreen)await player.requestFullscreen();else if(video.webkitEnterFullscreen)video.webkitEnterFullscreen();else $('#notice').textContent='Fullscreen is unavailable in this browser.'}catch{$('#notice').textContent='Fullscreen could not open. Playback still works here.'}};
 document.addEventListener('fullscreenchange',()=>$('#fullscreen').setAttribute('aria-label',document.fullscreenElement?'Exit fullscreen':'Enter fullscreen'));
 for(const event of ['play','pause','timeupdate','loadedmetadata','durationchange','volumechange','ended','seeked'])video.addEventListener(event,sync);
 video.addEventListener('waiting',()=>{buffering=true;sync()});for(const event of ['playing','canplay'])video.addEventListener(event,()=>{buffering=false;$('#screen-error').textContent='';sync()});video.addEventListener('error',()=>{$('#screen-error').textContent='Transmission interrupted. Reload to reconnect.';sync()});
