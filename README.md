@@ -24,6 +24,12 @@ Ultraviolet glass and silver ribs, with a sculptural shell and oversized Play co
 
 **[Play BIOPOD](https://subtlegradient.github.io/spriteware-videojs-skins/?skin=biopod)**
 
+## Liquid Orbit
+
+Electric aqua and liquid chrome. An asymmetric spacecraft with a dominant Play jewel and a separate pause control.
+
+**[Play Liquid Orbit](https://subtlegradient.github.io/spriteware-videojs-skins/?skin=liquid)**
+
 ## Controls
 
 Play and Pause are separate buttons. Tab between controls; Enter or Space activates buttons. Timeline arrows seek five seconds, Home and End jump to either end, and Escape closes chapter selection. iPhone may use native fullscreen and hardware volume.
