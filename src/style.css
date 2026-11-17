@@ -29,3 +29,10 @@ html{background:#23411e url('../public/meadow-wallpaper.webp') center/cover no-r
 .video-expanded video-player{container-type:normal;position:fixed;inset:0;z-index:2147483646;width:100vw!important;height:100dvh;margin:0}
 
 .video-fullscreen-status{position:absolute;z-index:20;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:160px;margin:0;padding:8px;background:#000b;color:white;font:12px/1.4 system-ui;pointer-events:none}.video-fullscreen-status[hidden]{display:none}
+
+/* Vertical range thumbs must not consume the entire track. Pointer movement uses
+   registered rail coordinates, avoiding engine-dependent vertical native geometry. */
+.range.volume{touch-action:none}
+.range.volume::-webkit-slider-runnable-track{width:100%;height:100%}
+.range.volume::-webkit-slider-thumb{width:100%;height:1px}
+.range.volume::-moz-range-thumb{width:100%;height:1px}

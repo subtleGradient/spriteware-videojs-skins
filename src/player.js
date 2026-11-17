@@ -1,3 +1,4 @@
+import {supportsMediaVolume,applyMediaVolume,bindVolumePointer} from './volume.js';
 import {createVideoFullscreen} from './fullscreen.js';
 import {chapterTabExit,chapterArrowIndex} from './keyboard.js';
 import '@videojs/html/video/player';
@@ -41,13 +42,13 @@ for(const id of ['seek','previous','play','pause','stop','next','mute','volume',
 scene.append($('.chapter-menu'));
 $('.chapter-menu').setAttribute('role','dialog');$('.chapter-menu').setAttribute('aria-label','Video chapters');
 $('.chapter-menu').querySelectorAll('button').forEach(b=>b.tabIndex=0);
-await customElements.whenDefined('video-player');video.volume=.65;
+await customElements.whenDefined('video-player');let volumeWritable=supportsMediaVolume(video);if(volumeWritable)video.volume=.65;
 const fmt=t=>`${String(Math.floor((t||0)/60)).padStart(2,'0')}:${String(Math.floor((t||0)%60)).padStart(2,'0')}`;
 let seeking=false,buffering=false;
 function sync(){
  $('.time-readout').textContent=`${fmt(video.currentTime)} / ${fmt(Number.isFinite(video.duration)?video.duration:24)}`;
  const ready=Number.isFinite(video.duration);$('#seek').disabled=!ready;$('#seek').max=ready?video.duration:24;if(!seeking)$('#seek').value=video.currentTime;$('#seek').setAttribute('aria-valuetext',`${fmt(video.currentTime)} of ${fmt(video.duration)}`);$('#seek').draw();
- $('#volume').value=video.muted?0:video.volume;$('#volume').setAttribute('aria-valuetext',`${Math.round((video.muted?0:video.volume)*100)} percent`);$('#volume').draw();
+ $('#volume').value=video.muted?0:video.volume;$('#volume').setAttribute('aria-valuetext',volumeWritable?`${Math.round((video.muted?0:video.volume)*100)} percent`:'Use device volume buttons');$('#volume').setAttribute('aria-disabled',String(!volumeWritable));$('#volume').draw();
  $('#mute').setAttribute('aria-label',video.muted?'Unmute':'Mute');$('#mute').setAttribute('aria-pressed',String(video.muted));
  $('#play').dataset.latched=String(!video.paused);$('#pause').dataset.latched=String(video.paused&&video.currentTime>0);
  const cc=[...video.textTracks].some(t=>t.kind==='captions'&&t.mode==='showing');$('#captions').setAttribute('aria-pressed',String(cc));
@@ -62,8 +63,13 @@ $('#stop').onclick=()=>{video.pause();seek(0)};
 $('#previous').onclick=()=>seek(video.currentTime%8>2?Math.floor(video.currentTime/8)*8:Math.max(0,Math.floor(video.currentTime/8)-1)*8);
 $('#next').onclick=()=>seek(Math.min(16,(Math.floor(video.currentTime/8)+1)*8));
 $('#mute').onclick=()=>{video.muted=!video.muted;sync()};
-$('#volume').oninput=e=>{video.volume=+e.target.value;video.muted=video.volume===0;sync()};
-$('#volume').onkeydown=e=>{let value;if(['ArrowUp','ArrowRight'].includes(e.key))value=video.volume+.05;else if(['ArrowDown','ArrowLeft'].includes(e.key))value=video.volume-.05;else if(e.key==='Home')value=0;else if(e.key==='End')value=1;else return;e.preventDefault();video.volume=Math.max(0,Math.min(1,value));video.muted=video.volume===0;sync()};
+function changeVolume(value){
+ if(!volumeWritable||!applyMediaVolume(video,value)){volumeWritable=false;$('#notice').textContent='This device controls sound level with its volume buttons. The speaker button still mutes and unmutes.'}
+ sync();
+}
+$('#volume').oninput=e=>changeVolume(+e.target.value);
+bindVolumePointer($('#volume'),scene,theme,changeVolume);
+$('#volume').onkeydown=e=>{let value;const current=video.muted?0:video.volume;if(['ArrowUp','ArrowRight'].includes(e.key))value=current+.05;else if(['ArrowDown','ArrowLeft'].includes(e.key))value=current-.05;else if(e.key==='Home')value=0;else if(e.key==='End')value=1;else return;e.preventDefault();changeVolume(value)};
 $('#seek').addEventListener('pointerdown',()=>seeking=true);for(const e of ['pointerup','pointercancel','blur'])window.addEventListener(e,()=>{seeking=false;sync()});
 $('#seek').oninput=e=>seek(+e.target.value);
 $('#seek').onkeydown=e=>{let t;const delta={ArrowRight:5,ArrowUp:5,ArrowLeft:-5,ArrowDown:-5,PageUp:10,PageDown:-10};if(e.key in delta)t=video.currentTime+delta[e.key];else if(e.key==='Home')t=0;else if(e.key==='End')t=video.duration;else return;e.preventDefault();seek(t)};

@@ -1,6 +1,6 @@
 # Spriteware
 
-![Liquid Orbit, Nebula Pop, and BIOPOD running on Video.js v10](public/images/spriteware-three-skins.jpg)
+![Liquid Orbit, Nebula Pop, and BIOPOD side by side on an XP-inspired landscape](public/images/spriteware-three-skins.jpg)
 
 [Download the project image](https://subtlegradient.github.io/spriteware-videojs-skins/images/spriteware-three-skins.jpg)
 
