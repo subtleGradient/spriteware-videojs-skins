@@ -1,3 +1,4 @@
+import {chapterTabExit,chapterArrowIndex} from './keyboard.js';
 import '@videojs/html/video/player';
 import '@videojs/html/ui/container';
 import nebula from './themes/nebula.js';
@@ -70,7 +71,7 @@ function closeMenu(restore=true){$('.chapter-menu').hidden=true;$('#chapters').s
 $('#chapters').setAttribute('aria-expanded','false');$('#chapters').onclick=()=>{const open=$('.chapter-menu').hidden;$('.chapter-menu').hidden=!open;$('#chapters').setAttribute('aria-expanded',String(open));if(open)$('.chapter-menu button').focus()};
 $('.chapter-menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.time)seek(+b.dataset.time);closeMenu()};
 // Native button Enter/Space behavior is preserved; arrows navigate the chapter popup.
-$('.chapter-menu').addEventListener('keydown',e=>{const buttons=[...$('.chapter-menu').querySelectorAll('button')],i=buttons.indexOf(document.activeElement);let next;if(e.key==='ArrowDown')next=(i+1)%buttons.length;else if(e.key==='ArrowUp')next=(i-1+buttons.length)%buttons.length;else if(e.key==='Home')next=0;else if(e.key==='End')next=buttons.length-1;else return;e.preventDefault();buttons[next].focus()});
+$('.chapter-menu').addEventListener('keydown',e=>{const buttons=[...$('.chapter-menu').querySelectorAll('button')],i=buttons.indexOf(document.activeElement);const exit=chapterTabExit(e.key,e.shiftKey,i,buttons.length);if(exit){e.preventDefault();closeMenu(false);const opener=$('#chapters');let target=opener;if(exit==='after-opener'){const focusable=[...document.querySelectorAll('button,input,a[href],summary,[tabindex]')].filter(el=>el.tabIndex>=0&&!el.disabled&&!el.closest('[hidden],[inert]')&&el.getClientRects().length);target=focusable[focusable.indexOf(opener)+1]||opener}target.focus({preventScroll:true});return}const chapters=buttons.filter(b=>b.hasAttribute('data-time')),next=chapterArrowIndex(e.key,chapters.indexOf(document.activeElement),chapters.length);if(next===null)return;e.preventDefault();chapters[next].focus()});
 $('.chapter-menu').addEventListener('focusout',()=>queueMicrotask(()=>{if(!$('.chapter-menu').hidden&&!$('.chapter-menu').contains(document.activeElement))closeMenu(false)}));
 let fullscreenSession=false,previousControls=false,previousTabIndex='-1',savedScroll=[0,0];
 function restoreInline(){if(!fullscreenSession)return;fullscreenSession=false;video.controls=previousControls;video.setAttribute('tabindex',previousTabIndex);$('#fullscreen').setAttribute('aria-label','Enter fullscreen');$('#fullscreen').focus({preventScroll:true});window.scrollTo(...savedScroll)}
